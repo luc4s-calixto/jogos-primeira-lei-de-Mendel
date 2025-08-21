@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jogo da Memória — 1ª Lei de Mendel (Lei da Segregação)</title>
+<style>
+  :root{
+    --bg:#0e1320;
+    --card:#1b2437;
+    --ink:#e8eefc;
+    --muted:#a9b4d0;
+    --accent:#7cc4ff;
+    --ok:#45d483;
+    --no:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, 'Helvetica Neue', Arial, 'Apple Color Emoji','Segoe UI Emoji';
+    background: radial-gradient(1200px 700px at 10% -10%, #24304a 0%, #0e1320 45%, #0b0f19 100%);
+    color:var(--ink);
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+  }
+  header{
+    padding: clamp(14px, 2vw, 24px);
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+  }
+  header h1{
+    font-size: clamp(18px, 3vw, 28px);
+    margin:0;
+    font-weight:700;
+    letter-spacing:.2px;
+  }
+  .controls{
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+  }
+  button, .pill{
+    background: linear-gradient(180deg, #242f49, #182033);
+    color:var(--ink);
+    border:1px solid #2e3b59;
+    padding:10px 14px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+    letter-spacing:.2px;
+    transition: transform .08s ease, filter .2s ease, background .2s ease;
+    user-select:none;
+  }
+  button:hover{ filter: brightness(1.07); }
+  button:active{ transform: translateY(1px) scale(.99); }
+  .pill{
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .stats{ display:flex; gap:10px; align-items:center; }
+  .stats .pill{ font-size:14px; padding:8px 12px; }
+  .legend{ color:var(--muted); font-size:13px; }
+  main{ padding: 0 clamp(10px, 2vw, 24px) clamp(24px,3vw,32px); flex:1; display:grid; place-items:center; }
+  .grid{
+    width:min(1200px, 98vw);
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: clamp(8px, 1.6vw, 14px);
+  }
+  @media (max-width: 980px){
+    .grid{ grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 640px){
+    .grid{ grid-template-columns: repeat(3, 1fr); }
+  }
+  .card{
+    aspect-ratio: 3/4;
+    perspective: 800px;
+  }
+  .card > .inner{
+    position:relative;
+    width:100%;
+    height:100%;
+    transform-style: preserve-3d;
+    transition: transform .5s cubic-bezier(.2,.7,.2,1);
+    border-radius:16px;
+  }
+  .card.flipped > .inner{ transform: rotateY(180deg); }
+  .face{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+    border-radius:16px;
+    backface-visibility: hidden;
+    border:1px solid #2c3a59;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.02), 0 10px 20px rgba(0,0,0,.25);
+  }
+  .front{
+    background: linear-gradient(160deg, #1a2336, #131a2b);
+    color:var(--ink);
+  }
+  .back{
+    transform: rotateY(180deg);
+    background: linear-gradient(160deg, #0f1626, #0b1120);
+    border-style:dashed;
+    color:var(--muted);
+  }
+  .term{
+    font-weight:800;
+    font-size: clamp(16px, 1.8vw, 20px);
+    text-align:center;
+    line-height:1.25;
+  }
+  .def{
+    font-size: clamp(14px, 1.6vw, 18px);
+    text-align:center;
+    line-height:1.25;
+  }
+  .badge{
+    position:absolute; top:10px; right:10px;
+    padding:4px 8px; border-radius:100px; font-size:12px;
+    background:#14203a; border:1px solid #24355b; color:#9db7ff;
+  }
+  .matched .front{ border-color: #296446; box-shadow: 0 0 0 2px inset rgba(69,212,131,.15); }
+  .toast{
+    position: fixed;
+    left:50%; transform: translateX(-50%);
+    bottom:18px; background:#0f1727; color:var(--ink);
+    border:1px solid #24355b; padding:10px 14px; border-radius:10px;
+    font-size:14px; box-shadow: 0 12px 30px rgba(0,0,0,.35); opacity:0; pointer-events:none;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(-4px); }
+  .footer{
+    text-align:center; padding:14px; color:var(--muted); font-size:13px;
+  }
+  dialog{
+    border:none; border-radius:16px; padding:0; width:min(720px, 92vw);
+    background:#0f1727; color:var(--ink); box-shadow: 0 30px 80px rgba(0,0,0,.45);
+  }
+  dialog::backdrop{ background: rgba(0,0,0,.6); backdrop-filter: blur(3px); }
+  .modal-header{ padding:16px 18px; border-bottom:1px solid #24355b; display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .modal-header h3{ margin:0; font-size:18px;}
+  .modal-body{ padding:16px 18px; }
+  .modal-body ul{ margin:0; padding-left: 18px; }
+  .close{ background:transparent; border:1px solid #2e3b59; }
+  .kbd{
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size:12px; padding:2px 6px; border-radius:6px; border:1px solid #2e3b59; background:#141d31; color:#bcd0ff;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🧬 Jogo da Memória — 1ª Lei de Mendel <span class="legend">(Lei da Segregação)</span></h1>
+    <div class="controls">
+      <button id="btn-reiniciar" title="Começar novamente (R)"><span>🔁</span> Reiniciar</button>
+      <button id="btn-dicas" title="Ver resumo teórico (H)"><span>📚</span> Resumo</button>
+      <div class="stats">
+        <span class="pill" id="tentativas">Tentativas: 0</span>
+        <span class="pill" id="acertos">Pares: 0/0</span>
+        <span class="pill" id="tempo">⏱️ 00:00</span>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="grid" id="grid"></section>
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <div class="footer">
+    Dica: combine o <span class="kbd">TERMO</span> com sua <span class="kbd">DEFINIÇÃO</span>. Atalhos: <span class="kbd">R</span> reinicia • <span class="kbd">H</span> abre resumo.
+  </div>
+
+  <dialog id="modal">
+    <div class="modal-header">
+      <h3>📚 Resumo rápido — Primeira Lei de Mendel</h3>
+      <button class="close" id="fechar-modal">Fechar</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Lei da Segregação:</strong> em um indivíduo, os dois alelos de um gene se separam (segregam) na formação dos gametas. Cada gameta recebe apenas um alelo.</p>
+      <ul>
+        <li><strong>Monohibridismo:</strong> um único caráter em estudo (ex.: cor de ervilha).</li>
+        <li><strong>Genótipo x Fenótipo:</strong> genótipo é a composição de alelos (AA, Aa, aa); fenótipo é o que se observa.</li>
+        <li><strong>Dominante/Recessivo:</strong> o alelo dominante se expressa no heterozigoto; o recessivo aparece apenas em homozigose.</li>
+        <li><strong>Proporção clássica em Aa × Aa:</strong> genótipos 1 AA : 2 Aa : 1 aa; fenótipos 3 dominantes : 1 recessivo.</li>
+        <li><strong>Quadrado de Punnett:</strong> tabela que prevê as combinações entre gametas.</li>
+      </ul>
+    </div>
+  </dialog>
+
+<script>
+// Conteúdo didático (pares termo-definição)
+const pairs = [
+  { id:'lei', term:'Lei da Segregação', def:'Os alelos de um gene se separam na formação dos gametas.'},
+  { id:'alelo', term:'Alelo', def:'Forma alternativa de um mesmo gene (ex.: A ou a).'},
+  { id:'genotipo', term:'Genótipo', def:'Conjunto de alelos de um indivíduo (AA, Aa, aa).'},
+  { id:'fenotipo', term:'Fenótipo', def:'Característica observável (ex.: cor da semente).'},
+  { id:'dominante', term:'Dominante', def:'Alelo que se manifesta no heterozigoto (Aa).'},
+  { id:'recessivo', term:'Recessivo', def:'Só se manifesta em homozigose (aa).'},
+  { id:'homozigoto', term:'Homozigoto', def:'Dois alelos iguais (AA ou aa).'},
+  { id:'heterozigoto', term:'Heterozigoto', def:'Dois alelos diferentes (Aa).'},
+  { id:'monohibrido', term:'Cruzamento monohíbrido', def:'Estuda um caráter; em Aa × Aa → 3:1 no fenótipo.'},
+  { id:'gameta', term:'Gametas', def:'Cada gameta carrega apenas um alelo para cada gene.'},
+  { id:'punnett', term:'Quadrado de Punnett', def:'Tabela para prever combinações de alelos dos gametas.'},
+  { id:'proporcao', term:'Proporções clássicas', def:'Genótipos 1:2:1 | Fenótipos 3:1 (Aa × Aa).'},
+];
+
+// Cria baralho duplicando termo e definição como cartas separadas
+function buildDeck(){
+  const deck = [];
+  pairs.forEach(p => {
+    deck.push({type:'term', id:p.id, text:p.term});
+    deck.push({type:'def', id:p.id, text:p.def});
+  });
+  return shuffle(deck);
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+const grid = document.getElementById('grid');
+const toast = document.getElementById('toast');
+const attemptsEl = document.getElementById('tentativas');
+const matchesEl = document.getElementById('acertos');
+const timeEl = document.getElementById('tempo');
+const btnReset = document.getElementById('btn-reiniciar');
+const btnDicas = document.getElementById('btn-dicas');
+const modal = document.getElementById('modal');
+const fecharModal = document.getElementById('fechar-modal');
+
+let deck = [];
+let first = null;
+let second = null;
+let lock = false;
+let attempts = 0;
+let matches = 0;
+let timer = null;
+let seconds = 0;
+
+function formatTime(s){
+  const m = Math.floor(s/60).toString().padStart(2,'0');
+  const r = (s%60).toString().padStart(2,'0');
+  return m+':'+r;
+}
+
+function startTimer(){
+  stopTimer();
+  seconds = 0;
+  timeEl.textContent = '⏱️ ' + formatTime(seconds);
+  timer = setInterval(()=>{
+    seconds++;
+    timeEl.textContent = '⏱️ ' + formatTime(seconds);
+  }, 1000);
+}
+function stopTimer(){
+  if(timer){ clearInterval(timer); timer = null; }
+}
+
+function updateStats(){
+  attemptsEl.textContent = 'Tentativas: ' + attempts;
+  matchesEl.textContent = `Pares: ${matches}/${pairs.length}`;
+}
+
+function makeCard(card, idx){
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.dataset.id = card.id;
+  el.dataset.type = card.type;
+
+  el.innerHTML = `
+    <div class="inner">
+      <div class="face front">
+        <span class="badge">${card.type === 'term' ? 'TERMO' : 'DEFINIÇÃO'}</span>
+        <div class="${card.type === 'term' ? 'term' : 'def'}">${card.text}</div>
+      </div>
+      <div class="face back">
+        Clique para revelar
+      </div>
+    </div>
+  `;
+
+  el.addEventListener('click', ()=> onFlip(el));
+  return el;
+}
+
+function onFlip(el){
+  if(lock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  el.classList.add('flipped');
+
+  if(!first){
+    first = el;
+    return;
+  }
+  second = el;
+  lock = true;
+  attempts++;
+  updateStats();
+
+  const isMatch = first.dataset.id === second.dataset.id && first.dataset.type !== second.dataset.type;
+
+  setTimeout(()=>{
+    if(isMatch){
+      first.classList.add('matched');
+      second.classList.add('matched');
+      matches++;
+      showToast('🎉 Par correto!');
+      if(matches === pairs.length){
+        stopTimer();
+        showToast(`🏆 Você concluiu em ${formatTime(seconds)} com ${attempts} tentativas!`);
+      }
+    }else{
+      first.classList.remove('flipped');
+      second.classList.remove('flipped');
+      showToast('❌ Não é um par. Tente outra combinação!');
+    }
+    [first, second] = [null, null];
+    lock = false;
+    updateStats();
+  }, 650);
+}
+
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> toast.classList.remove('show'), 1400);
+}
+
+function mount(){
+  grid.innerHTML = '';
+  deck = buildDeck();
+  attempts = 0; matches = 0; first=null; second=null; lock=false;
+  updateStats();
+  deck.forEach((c,i)=> grid.appendChild(makeCard(c, i)));
+  startTimer();
+}
+
+btnReset.addEventListener('click', mount);
+btnDicas.addEventListener('click', ()=> modal.showModal());
+fecharModal.addEventListener('click', ()=> modal.close());
+document.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase()==='r'){ mount(); }
+  if(e.key.toLowerCase()==='h'){ modal.open ? modal.close() : modal.showModal(); }
+});
+
+// inicia
+mount();
+</script>
+</body>
+</html>

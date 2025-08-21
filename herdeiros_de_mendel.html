@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Jardim Genético - A Primeira Lei de Mendel</title>
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --secondary: #8BC34A;
+      --accent: #FFC107;
+      --text: #333;
+      --light: #f5f5f5;
+      --white: #fff;
+      --purple: #9C27B0;
+      --yellow: #FFEB3B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #E8F5E9;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 20px;
+      border-radius: 10px 10px 0 0;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .game-area {
+      background-color: var(--white);
+      border-radius: 0 0 10px 10px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .phase-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      background-color: var(--light);
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .objective {
+      background-color: #E1F5FE;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 5px solid var(--primary);
+    }
+
+    .objective h2 {
+      color: var(--primary-dark);
+      margin-bottom: 10px;
+    }
+
+    .objective .target {
+      font-weight: bold;
+      color: var(--purple);
+      font-size: 1.2rem;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: 3px solid transparent;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card.selected {
+      border-color: var(--accent);
+      background-color: #FFF9C4;
+    }
+
+    .allele {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .trait {
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .trait .color-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+      margin: 0 5px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: var(--light);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result.success {
+      background-color: #E8F5E9;
+      border-left: 5px solid var(--primary);
+    }
+
+    .result.failure {
+      background-color: #FFEBEE;
+      border-left: 5px solid #F44336;
+    }
+
+    .plant-display {
+      text-align: center;
+      margin: 20px 0;
+      padding: 20px;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .plant-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--white);
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 500px;
+      text-align: center;
+      position: relative;
+    }
+
+    .modal h2 {
+      color: var(--primary-dark);
+      margin-bottom: 20px;
+    }
+
+    .modal .btn {
+      margin-top: 20px;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #777;
+    }
+
+    .close-modal:hover {
+      color: #333;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+
+    .progress-bar {
+      height: 20px;
+      background-color: var(--primary);
+      border-radius: 5px;
+      width: 0%;
+      transition: width 0.5s;
+    }
+
+    .punnett-square {
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    .punnett-square td {
+      border: 2px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      width: 50px;
+      height: 50px;
+    }
+
+    .punnett-header {
+      background-color: var(--primary);
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Jardim Genético</h1>
+    </header>
+
+    <div class="game-area">
+      <div class="phase-info">
+        <div>
+          <h3>Fase <span id="phase-number">1</span></h3>
+          <p>Tentativas: <span id="attempts">0</span></p>
+        </div>
+        <div>
+          <h3>Pontuação: <span id="score">0</span></h3>
+        </div>
+      </div>
+
+      <div class="objective">
+        <h2>Objetivo:</h2>
+        <p id="objective-text">Crie uma planta com <span class="target" id="target-trait">flores roxas</span></p>
+      </div>
+
+      <div class="plant-display">
+        <div class="plant-icon" id="plant-icon">🌱</div>
+        <h3 id="plant-description">Selecione 2 cartas para cruzar</h3>
+        <div id="punnett-container"></div>
+      </div>
+
+      <div class="cards-container" id="cards-container">
+        <!-- Cartas serão inseridas aqui pelo JavaScript -->
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="create-btn" disabled>Cruzar Plantas</button>
+        <button class="btn" id="reset-btn">Reiniciar Fase</button>
+      </div>
+
+      <div class="result" id="result-message">
+        <p id="result-text"></p>
+      </div>
+      <p style="text-align: center; margin-top: 15  px;">Feito por Lucas</p>
+    </div>
+  </div>
+
+  <div class="modal" id="victory-modal">
+    <div class="modal-content">
+      <span class="close-modal" id="close-victory">&times;</span>
+      <h2>🎉 Parabéns! 🎉</h2>
+      <p>Você completou esta fase!</p>
+      <p>Pontos ganhos: <span id="points-earned">0</span></p>
+      <button class="btn" id="next-phase-btn">Próxima Fase</button>
+    </div>
+  </div>
+
+  <div class="modal" id="game-complete-modal">
+    <div class="modal-content">
+      <span class="close-modal" id="close-complete">&times;</span>
+      <h2>🏆 Vitória! 🏆</h2>
+      <p>Você completou todas as fases do jogo!</p>
+      <p>Pontuação final: <span id="final-score">0</span></p>
+      <button class="btn" id="play-again-btn">Jogar Novamente</button>
+    </div>
+  </div>
+
+  <script>
+    // Configuração do jogo
+    const TRAITS = {
+      color: {
+        name: "Cor da Flor",
+        dominant: {
+          allele: "P",
+          description: "Roxa",
+          icon: "🌸",
+          color: "#9C27B0"
+        },
+        recessive: {
+          allele: "p",
+          description: "Branca",
+          icon: "🌼",
+          color: "#FFFFFF"
+        }
+      },
+      stem: {
+        name: "Cor do Caule",
+        dominant: {
+          allele: "V",
+          description: "Verde",
+          icon: "🌿",
+          color: "#4CAF50"
+        },
+        recessive: {
+          allele: "v",
+          description: "Amarelo",
+          icon: "🍂",
+          color: "#FFEB3B"
+        }
+      },
+      height: {
+        name: "Altura da Planta",
+        dominant: {
+          allele: "A",
+          description: "Alta",
+          icon: "🌳",
+          color: "#388E3C"
+        },
+        recessive: {
+          allele: "a",
+          description: "Baixa",
+          icon: "🌱",
+          color: "#8BC34A"
+        }
+      },
+      leaf: {
+        name: "Formato da Folha",
+        dominant: {
+          allele: "L",
+          description: "Larga",
+          icon: "🍃",
+          color: "#2E7D32"
+        },
+        recessive: {
+          allele: "l",
+          description: "Estreita",
+          icon: "🌾",
+          color: "#7CB342"
+        }
+      }
+    };
+
+    const PHASES = [
+      { title: "Fase 1: Dominância Completa", objective: { type: "phenotype", trait: "color", target: "dominant", description: "Crie uma planta com flores roxas" }, cards: ["PP", "pp", "Pp", "Pp", "pp", "pp"] },
+      { title: "Fase 2: Recessividade Completa", objective: { type: "phenotype", trait: "color", target: "recessive", description: "Crie uma planta com flores brancas" }, cards: ["Pp", "Pp", "Pp", "pp", "pp", "PP"] },
+      { title: "Fase 3: Heterozigoto", objective: { type: "genotype", trait: "height", target: "Aa", description: "Crie uma planta heterozigótica para altura" }, cards: ["AA", "Aa", "Aa", "aa", "aa", "Aa"] },
+      { title: "Fase 4: Cruzamento Diíbrido", objective: { type: "multi-phenotype", traits: [{ trait: "color", target: "dominant" }, { trait: "stem", target: "recessive" }], description: "Crie uma planta com flores roxas e caule amarelo" }, cards: ["PPVV", "PPVv", "PPvv", "PpVV", "PpVv", "Ppvv"] },
+      { title: "Fase 5: Múltiplas Características", objective: { type: "multi-phenotype", traits: [{ trait: "height", target: "dominant" }, { trait: "leaf", target: "recessive" }], description: "Crie uma planta alta com folhas estreitas" }, cards: ["AALl", "AAll", "AaLl", "aaLl", "AaLl", "AAll"] },
+      { title: "Fase 6: Recessivo em Altura", objective: { type: "phenotype", trait: "height", target: "recessive", description: "Crie uma planta baixa" }, cards: ["Aa", "Aa", "AA", "aa", "aa", "aa"] },
+      { title: "Fase 7: Dominante no Caule", objective: { type: "phenotype", trait: "stem", target: "dominant", description: "Crie uma planta com caule verde" }, cards: ["VV", "Vv", "Vv", "Vv", "vv", "vv"] },
+      { title: "Fase 8: Heterozigoto em Folha", objective: { type: "genotype", trait: "leaf", target: "Ll", description: "Crie uma planta heterozigótica para folhas" }, cards: ["LL", "Ll", "Ll", "Ll", "ll", "ll"] },
+      { title: "Fase 9: Cruzamento Cor + Altura", objective: { type: "multi-phenotype", traits: [{ trait: "color", target: "recessive" }, { trait: "height", target: "dominant" }], description: "Crie uma planta com flores brancas e altura alta" }, cards: ["PpAa", "PpAa", "ppAA", "ppAa", "PpAa", "PpAA"] },
+      { title: "Fase 10: Características Combinadas", objective: { type: "multi-phenotype", traits: [{ trait: "stem", target: "dominant" }, { trait: "leaf", target: "dominant" }], description: "Crie uma planta com caule verde e folhas largas" }, cards: ["VVLl", "VvLl", "VVLl", "VvLL", "vvLl", "Vvll"] }
+    ];
+
+    // Estado do jogo
+    let gameState = {
+      currentPhase: 0,
+      score: 0,
+      attempts: 0,
+      selectedCards: [],
+      completedPhases: []
+    };
+
+    // Elementos do DOM
+    const phaseNumberEl = document.getElementById('phase-number');
+    const attemptsEl = document.getElementById('attempts');
+    const scoreEl = document.getElementById('score');
+    const objectiveTextEl = document.getElementById('objective-text');
+    const targetTraitEl = document.getElementById('target-trait');
+    const cardsContainerEl = document.getElementById('cards-container');
+    const createBtnEl = document.getElementById('create-btn');
+    const resetBtnEl = document.getElementById('reset-btn');
+    const resultMessageEl = document.getElementById('result-message');
+    const resultTextEl = document.getElementById('result-text');
+    const plantIconEl = document.getElementById('plant-icon');
+    const plantDescEl = document.getElementById('plant-description');
+    const punnettContainerEl = document.getElementById('punnett-container');
+    const victoryModalEl = document.getElementById('victory-modal');
+    const nextPhaseBtnEl = document.getElementById('next-phase-btn');
+    const pointsEarnedEl = document.getElementById('points-earned');
+    const gameCompleteModalEl = document.getElementById('game-complete-modal');
+    const finalScoreEl = document.getElementById('final-score');
+    const playAgainBtnEl = document.getElementById('play-again-btn');
+    const closeVictoryEl = document.getElementById('close-victory');
+    const closeCompleteEl = document.getElementById('close-complete');
+
+    // Inicialização do jogo
+    function initGame() {
+      gameState = {
+        currentPhase: 0,
+        score: 0,
+        attempts: 0,
+        selectedCards: [],
+        completedPhases: []
+      };
+
+      loadPhase(gameState.currentPhase);
+    }
+
+    // Carrega uma fase específica
+    function loadPhase(phaseIndex) {
+      gameState.currentPhase = phaseIndex;
+      gameState.attempts = 0;
+      gameState.selectedCards = [];
+
+      const phase = PHASES[phaseIndex];
+
+      // Atualiza a interface
+      phaseNumberEl.textContent = phaseIndex + 1;
+      attemptsEl.textContent = gameState.attempts;
+      objectiveTextEl.textContent = phase.objective.description;
+
+      // Limpa o resultado anterior
+      resultMessageEl.className = 'result';
+      resultMessageEl.style.display = 'none';
+      punnettContainerEl.innerHTML = '';
+
+      // Cria as cartas
+      createCards(phase.cards);
+
+      // Atualiza a descrição da planta
+      updatePlantDisplay();
+    }
+
+    // Cria as cartas para a fase atual
+    function createCards(cardGenotypes) {
+      cardsContainerEl.innerHTML = '';
+
+      cardGenotypes.forEach((genotype, index) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card';
+        cardEl.dataset.index = index;
+        cardEl.dataset.genotype = genotype;
+
+        // Para fases simples com um único traço
+        if (genotype.length <= 2) {
+          const trait = getTraitForGenotype(genotype);
+          const phenotype = getPhenotype(genotype, trait);
+
+          cardEl.innerHTML = `
+        <div class="allele">${genotype}</div>
+        <div class="trait">
+          <span class="color-indicator" style="background-color: ${phenotype.color}"></span>
+          ${phenotype.description}
+        </div>
+      `;
+        }
+        // Para fases com 2 características
+        else if (genotype.length === 4) {
+          const phase = PHASES[gameState.currentPhase];
+
+          // Verifica quais características estão sendo usadas nesta fase
+          let trait1, trait2;
+          if (phase.objective.type === "multi-phenotype") {
+            trait1 = TRAITS[phase.objective.traits[0].trait];
+            trait2 = TRAITS[phase.objective.traits[1].trait];
+          } else {
+            // Padrão para color e stem se não for especificado
+            trait1 = TRAITS.color;
+            trait2 = TRAITS.stem;
+          }
+
+          const genotype1 = genotype.substring(0, 2);
+          const genotype2 = genotype.substring(2, 4);
+
+          const phenotype1 = getPhenotype(genotype1, trait1);
+          const phenotype2 = getPhenotype(genotype2, trait2);
+
+          cardEl.innerHTML = `
+        <div class="allele">${genotype}</div>
+        <div class="trait">
+          <span class="color-indicator" style="background-color: ${phenotype1.color}"></span>
+          ${phenotype1.description}
+        </div>
+        <div class="trait">
+          <span class="color-indicator" style="background-color: ${phenotype2.color}"></span>
+          ${phenotype2.description}
+        </div>
+      `;
+        }
+
+        cardEl.addEventListener('click', () => selectCard(cardEl));
+        cardsContainerEl.appendChild(cardEl);
+      });
+    }
+
+    // Obtém o traço correspondente ao genótipo (para fases simples)
+    function getTraitForGenotype(genotype) {
+      const phase = PHASES[gameState.currentPhase];
+      return TRAITS[phase.objective.trait];
+    }
+
+    // Obtém o fenótipo para um genótipo e traço específicos
+    function getPhenotype(genotype, trait) {
+      const dominantAllele = trait.dominant.allele;
+
+      // Verifica se há pelo menos um alelo dominante
+      if (genotype.includes(dominantAllele)) {
+        return {
+          description: trait.dominant.description,
+          icon: trait.dominant.icon,
+          color: trait.dominant.color
+        };
+      } else {
+        return {
+          description: trait.recessive.description,
+          icon: trait.recessive.icon,
+          color: trait.recessive.color
+        };
+      }
+    }
+
+    // Seleciona/deseleciona uma carta
+    function selectCard(cardEl) {
+      const index = parseInt(cardEl.dataset.index);
+
+      if (gameState.selectedCards.includes(index)) {
+        // Deseleciona a carta
+        gameState.selectedCards = gameState.selectedCards.filter(i => i !== index);
+        cardEl.classList.remove('selected');
+      } else {
+        // Seleciona a carta (limite de 2 seleções)
+        if (gameState.selectedCards.length < 2) {
+          gameState.selectedCards.push(index);
+          cardEl.classList.add('selected');
+        }
+      }
+
+      // Atualiza o botão de criação
+      createBtnEl.disabled = gameState.selectedCards.length !== 2;
+
+      // Atualiza a exibição da planta
+      updatePlantDisplay();
+    }
+
+    // Atualiza a exibição com base na seleção atual
+    function updatePlantDisplay() {
+      if (gameState.selectedCards.length === 0) {
+        plantIconEl.textContent = '🌱';
+        plantDescEl.textContent = 'Selecione 2 cartas para cruzar';
+        punnettContainerEl.innerHTML = '';
+        return;
+      }
+
+      // Mostra apenas que cartas foram selecionadas
+      if (gameState.selectedCards.length < 2) {
+        const selectedIndex = gameState.selectedCards[0];
+        const selectedCard = document.querySelector(`.card[data-index="${selectedIndex}"]`);
+        const genotype = selectedCard.dataset.genotype;
+
+        plantIconEl.textContent = '❓';
+        plantDescEl.textContent = `Selecionado: ${genotype} - Selecione mais uma carta`;
+        punnettContainerEl.innerHTML = '';
+        return;
+      }
+
+      // Quando duas cartas estão selecionadas
+      const [index1, index2] = gameState.selectedCards;
+      const card1 = document.querySelector(`.card[data-index="${index1}"]`);
+      const card2 = document.querySelector(`.card[data-index="${index2}"]`);
+      const genotype1 = card1.dataset.genotype;
+      const genotype2 = card2.dataset.genotype;
+
+      // Gera o quadrado de Punnett
+      generatePunnettSquare(genotype1, genotype2);
+
+      // Mostra os genótipos selecionados
+      plantDescEl.textContent = `Cruzamento: ${genotype1} × ${genotype2}`;
+    }
+
+    // Gera o quadrado de Punnett para o cruzamento
+    function generatePunnettSquare(genotype1, genotype2) {
+      punnettContainerEl.innerHTML = '';
+
+      // Para genótipos simples (1 caractere)
+      if (genotype1.length <= 2) {
+        const alleles1 = genotype1.split('');
+        const alleles2 = genotype2.split('');
+
+        const table = document.createElement('table');
+        table.className = 'punnett-square';
+
+        // Cabeçalho
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = `<td class="punnett-header"></td>`;
+        alleles2.forEach(a => {
+          headerRow.innerHTML += `<td class="punnett-header">${a}</td>`;
+        });
+        table.appendChild(headerRow);
+
+        // Linhas do quadrado
+        alleles1.forEach(a1 => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td class="punnett-header">${a1}</td>`;
+
+          alleles2.forEach(a2 => {
+            const cell = document.createElement('td');
+            cell.textContent = a1 + a2;
+
+            // Destaca genótipos que atendem ao objetivo
+            if (checkGenotypeAgainstObjective(a1 + a2)) {
+              cell.style.backgroundColor = '#C8E6C9';
+            }
+
+            row.appendChild(cell);
+          });
+
+          table.appendChild(row);
+        });
+
+        punnettContainerEl.appendChild(table);
+      }
+      // Para genótipos complexos (2 características)
+      else if (genotype1.length === 4) {
+        const phase = PHASES[gameState.currentPhase];
+        let trait1, trait2;
+
+        if (phase.objective.type === "multi-phenotype") {
+          trait1 = TRAITS[phase.objective.traits[0].trait];
+          trait2 = TRAITS[phase.objective.traits[1].trait];
+        } else {
+          // Padrão para color e stem se não for especificado
+          trait1 = TRAITS.color;
+          trait2 = TRAITS.stem;
+        }
+
+        const genotype1a = genotype1.substring(0, 1);
+        const genotype1b = genotype1.substring(2, 3);
+        const genotype2a = genotype2.substring(0, 1);
+        const genotype2b = genotype2.substring(2, 3);
+
+        const table = document.createElement('table');
+        table.className = 'punnett-square';
+
+        // Cabeçalho
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = `<td class="punnett-header"></td>`;
+
+        // Gera os gametas para a segunda planta
+        const gametes2 = [];
+        for (let i = 0; i < 2; i++) {
+          for (let j = 0; j < 2; j++) {
+            const gamete = genotype2.substring(i, i + 1) + genotype2.substring(j + 2, j + 3);
+            gametes2.push(gamete);
+            headerRow.innerHTML += `<td class="punnett-header">${gamete}</td>`;
+          }
+        }
+        table.appendChild(headerRow);
+
+        // Gera os gametas para a primeira planta
+        const gametes1 = [];
+        for (let i = 0; i < 2; i++) {
+          for (let j = 0; j < 2; j++) {
+            gametes1.push(genotype1.substring(i, i + 1) + genotype1.substring(j + 2, j + 3));
+          }
+        }
+
+        // Linhas do quadrado
+        gametes1.forEach(g1 => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td class="punnett-header">${g1}</td>`;
+
+          gametes2.forEach(g2 => {
+            const cell = document.createElement('td');
+            const offspring = g1 + g2;
+            cell.textContent = offspring;
+
+            // Verifica se atende ao objetivo
+            if (checkGenotypeAgainstObjective(offspring)) {
+              cell.style.backgroundColor = '#C8E6C9';
+            }
+
+            row.appendChild(cell);
+          });
+
+          table.appendChild(row);
+        });
+
+        punnettContainerEl.appendChild(table);
+      }
+    }
+
+    // Verifica se um genótipo atende ao objetivo da fase
+    function checkGenotypeAgainstObjective(genotype) {
+      const phase = PHASES[gameState.currentPhase];
+
+      switch (phase.objective.type) {
+        case "phenotype":
+          const trait = TRAITS[phase.objective.trait];
+          const phenotype = getPhenotype(genotype, trait);
+          return (phase.objective.target === "dominant" && phenotype.description === trait.dominant.description) ||
+            (phase.objective.target === "recessive" && phenotype.description === trait.recessive.description);
+
+        case "genotype":
+          return genotype === phase.objective.target;
+
+        case "multi-phenotype":
+          const trait1 = TRAITS[phase.objective.traits[0].trait];
+          const trait2 = TRAITS[phase.objective.traits[1].trait];
+
+          const genotype1 = genotype.substring(0, 2);
+          const genotype2 = genotype.substring(2, 4);
+
+          const phenotype1 = getPhenotype(genotype1, trait1);
+          const phenotype2 = getPhenotype(genotype2, trait2);
+
+          const match1 = phase.objective.traits[0].target === "dominant" ?
+            phenotype1.description === trait1.dominant.description :
+            phenotype1.description === trait1.recessive.description;
+
+          const match2 = phase.objective.traits[1].target === "dominant" ?
+            phenotype2.description === trait2.dominant.description :
+            phenotype2.description === trait2.recessive.description;
+
+          return match1 && match2;
+
+        default:
+          return false;
+      }
+    }
+
+    // Verifica se o cruzamento atende ao objetivo da fase
+    function checkObjective() {
+      gameState.attempts++;
+      attemptsEl.textContent = gameState.attempts;
+
+      const [index1, index2] = gameState.selectedCards;
+      const card1 = document.querySelector(`.card[data-index="${index1}"]`);
+      const card2 = document.querySelector(`.card[data-index="${index2}"]`);
+      const genotype1 = card1.dataset.genotype;
+      const genotype2 = card2.dataset.genotype;
+
+      const phase = PHASES[gameState.currentPhase];
+      let success = false;
+
+      // Verifica o objetivo com base no tipo
+      switch (phase.objective.type) {
+        case "phenotype":
+          // Para objetivos de fenótipo, verifica se algum descendente possível atende
+          const trait = TRAITS[phase.objective.trait];
+          const alleles1 = genotype1.split('');
+          const alleles2 = genotype2.split('');
+
+          for (const a1 of alleles1) {
+            for (const a2 of alleles2) {
+              const offspringGenotype = a1 + a2;
+              const phenotype = getPhenotype(offspringGenotype, trait);
+
+              if ((phase.objective.target === "dominant" && phenotype.description === trait.dominant.description) ||
+                (phase.objective.target === "recessive" && phenotype.description === trait.recessive.description)) {
+                success = true;
+                break;
+              }
+            }
+            if (success) break;
+          }
+          break;
+
+        case "genotype":
+          // Para objetivos de genótipo, verifica se o genótipo exato é possível
+          const targetGenotype = phase.objective.target;
+          const possibleGenotypes = [];
+
+          for (const a1 of genotype1.split('')) {
+            for (const a2 of genotype2.split('')) {
+              possibleGenotypes.push(a1 + a2);
+            }
+          }
+
+          success = possibleGenotypes.includes(targetGenotype);
+          break;
+
+        case "multi-phenotype":
+          // Para objetivos com múltiplos fenótipos
+          const trait1 = TRAITS[phase.objective.traits[0].trait];
+          const trait2 = TRAITS[phase.objective.traits[1].trait];
+
+          // Gera todos os possíveis gametas para cada planta
+          const gametes1 = generateGametes(genotype1);
+          const gametes2 = generateGametes(genotype2);
+
+          // Verifica todos os possíveis descendentes
+          for (const g1 of gametes1) {
+            for (const g2 of gametes2) {
+              const offspringGenotype = g1 + g2;
+              const genotype1 = offspringGenotype.substring(0, 2);
+              const genotype2 = offspringGenotype.substring(2, 4);
+
+              const phenotype1 = getPhenotype(genotype1, trait1);
+              const phenotype2 = getPhenotype(genotype2, trait2);
+
+              // Verifica se atende a ambos os objetivos
+              const match1 = phase.objective.traits[0].target === "dominant" ?
+                phenotype1.description === trait1.dominant.description :
+                phenotype1.description === trait1.recessive.description;
+
+              const match2 = phase.objective.traits[1].target === "dominant" ?
+                phenotype2.description === trait2.dominant.description :
+                phenotype2.description === trait2.recessive.description;
+
+              if (match1 && match2) {
+                success = true;
+                break;
+              }
+            }
+            if (success) break;
+          }
+          break;
+      }
+
+      // Mostra o resultado
+      showResult(success);
+
+      // Se bem-sucedido, calcula pontos e avança
+      if (success) {
+        const points = calculatePoints();
+        gameState.score += points;
+        scoreEl.textContent = gameState.score;
+
+        // Mostra modal de vitória
+        pointsEarnedEl.textContent = points;
+        victoryModalEl.style.display = 'flex';
+      }
+    }
+
+    // Gera gametas para genótipos diíbridos
+    function generateGametes(genotype) {
+      if (genotype.length === 4) {
+        // Para AaBb, gera AB, Ab, aB, ab
+        const [a1, a2, b1, b2] = genotype.split('');
+        return [
+          a1 + b1,
+          a1 + b2,
+          a2 + b1,
+          a2 + b2
+        ];
+      }
+      return genotype.split(''); // Para genótipos simples
+    }
+
+    // Calcula pontos com base no número de tentativas
+    function calculatePoints() {
+      if (gameState.attempts <= 1) return 50;
+      if (gameState.attempts <= 3) return 30;
+      if (gameState.attempts <= 5) return 20;
+      return 10;
+    }
+
+    // Mostra o resultado da tentativa
+    function showResult(success) {
+      resultMessageEl.className = success ? 'result success' : 'result failure';
+      resultTextEl.textContent = success ?
+        '✅ Sucesso! Este cruzamento pode produzir a planta desejada!' :
+        '❌ Não foi dessa vez. Tente outro cruzamento!';
+      resultMessageEl.style.display = 'block';
+    }
+
+    // Avança para a próxima fase
+    function nextPhase() {
+      victoryModalEl.style.display = 'none';
+
+      if (gameState.currentPhase < PHASES.length - 1) {
+        gameState.currentPhase++;
+        loadPhase(gameState.currentPhase);
+      } else {
+        // Jogo completo
+        finalScoreEl.textContent = gameState.score;
+        gameCompleteModalEl.style.display = 'flex';
+      }
+    }
+
+    // Fecha o modal
+    function closeModal(modal) {
+      modal.style.display = 'none';
+    }
+
+    // Event listeners
+    createBtnEl.addEventListener('click', checkObjective);
+    resetBtnEl.addEventListener('click', () => loadPhase(gameState.currentPhase));
+    nextPhaseBtnEl.addEventListener('click', nextPhase);
+    playAgainBtnEl.addEventListener('click', initGame);
+    closeVictoryEl.addEventListener('click', () => closeModal(victoryModalEl));
+    closeCompleteEl.addEventListener('click', () => closeModal(gameCompleteModalEl));
+
+    // Fecha o modal ao clicar fora dele
+    window.addEventListener('click', (event) => {
+      if (event.target === victoryModalEl) {
+        closeModal(victoryModalEl);
+      }
+      if (event.target === gameCompleteModalEl) {
+        closeModal(gameCompleteModalEl);
+      }
+    });
+
+    // Inicia o jogo
+    initGame();
+  </script>
+</body>
+
+</html>
