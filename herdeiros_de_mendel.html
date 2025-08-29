@@ -336,13 +336,13 @@
 
       <div class="controls">
         <button class="btn" id="create-btn" disabled>Cruzar Plantas</button>
-        <button class="btn" id="reset-btn">Reiniciar Fase</button>
+        <button class="btn" id="reset-btn">Reiniciar</button>
       </div>
 
       <div class="result" id="result-message">
         <p id="result-text"></p>
       </div>
-      <p style="text-align: center; margin-top: 15  px;">Feito por Lucas</p>
+      <p style="text-align: center; margin-top: 15px;">Feito por Lucas Calixto, Marina e Gabriela</p>
     </div>
   </div>
 
@@ -968,7 +968,7 @@
 
     // Event listeners
     createBtnEl.addEventListener('click', checkObjective);
-    resetBtnEl.addEventListener('click', () => loadPhase(gameState.currentPhase));
+    resetBtnEl.addEventListener('click', () => location.reload());
     nextPhaseBtnEl.addEventListener('click', nextPhase);
     playAgainBtnEl.addEventListener('click', initGame);
     closeVictoryEl.addEventListener('click', () => closeModal(victoryModalEl));
