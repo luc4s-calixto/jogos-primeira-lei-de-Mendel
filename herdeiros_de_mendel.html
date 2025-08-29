@@ -430,19 +430,26 @@
         }
       }
     };
+    TRAITS.seed = { name: "Tamanho da Semente", dominant: { allele: "S", description: "Grande", icon: "🌰", color: "#8D6E63" }, recessive: { allele: "s", description: "Pequena", icon: "🌱", color: "#A1887F" } };
+    TRAITS.petal = { name: "Cor da Pétala", dominant: { allele: "R", description: "Vermelha", icon: "🌺", color: "#F44336" }, recessive: { allele: "r", description: "Amarela", icon: "🌻", color: "#FFF176" } };
+    TRAITS.fruit = { name: "Sabor do Fruto", dominant: { allele: "D", description: "Doce", icon: "🍓", color: "#FF5252" }, recessive: { allele: "d", description: "Ácido", icon: "🍋", color: "#FFD600" } };
+    TRAITS.thorn = { name: "Espinhos", dominant: { allele: "T", description: "Presentes", icon: "🌵", color: "#4CAF50" }, recessive: { allele: "t", description: "Ausentes", icon: "🌿", color: "#AED581" } };
+    TRAITS.leaf2 = { name: "Formato da Folha 2", dominant: { allele: "L", description: "Larga", icon: "🍃", color: "#388E3C" }, recessive: { allele: "l", description: "Estreita", icon: "🌾", color: "#7CB342" } };
+
 
     const PHASES = [
-      { title: "Fase 1: Dominância Completa", objective: { type: "phenotype", trait: "color", target: "dominant", description: "Crie uma planta com flores roxas" }, cards: ["PP", "pp", "Pp", "Pp", "pp", "pp"] },
-      { title: "Fase 2: Recessividade Completa", objective: { type: "phenotype", trait: "color", target: "recessive", description: "Crie uma planta com flores brancas" }, cards: ["Pp", "Pp", "Pp", "pp", "pp", "PP"] },
+      { title: "Fase 1: Dominância Completa", objective: { type: "phenotype", trait: "color", target: "dominant", description: "Crie uma planta com flores roxas" }, cards: ["PP", "Pp", "Pp", "pp", "pp", "PP"] },
+      { title: "Fase 2: Recessividade Completa", objective: { type: "phenotype", trait: "color", target: "recessive", description: "Crie uma planta com flores brancas" }, cards: ["pp", "pp", "Pp", "Pp", "PP", "pp"] },
       { title: "Fase 3: Heterozigoto", objective: { type: "genotype", trait: "height", target: "Aa", description: "Crie uma planta heterozigótica para altura" }, cards: ["AA", "Aa", "Aa", "aa", "aa", "Aa"] },
-      { title: "Fase 4: Cruzamento Diíbrido", objective: { type: "multi-phenotype", traits: [{ trait: "color", target: "dominant" }, { trait: "stem", target: "recessive" }], description: "Crie uma planta com flores roxas e caule amarelo" }, cards: ["PPVV", "PPVv", "PPvv", "PpVV", "PpVv", "Ppvv"] },
-      { title: "Fase 5: Múltiplas Características", objective: { type: "multi-phenotype", traits: [{ trait: "height", target: "dominant" }, { trait: "leaf", target: "recessive" }], description: "Crie uma planta alta com folhas estreitas" }, cards: ["AALl", "AAll", "AaLl", "aaLl", "AaLl", "AAll"] },
-      { title: "Fase 6: Recessivo em Altura", objective: { type: "phenotype", trait: "height", target: "recessive", description: "Crie uma planta baixa" }, cards: ["Aa", "Aa", "AA", "aa", "aa", "aa"] },
-      { title: "Fase 7: Dominante no Caule", objective: { type: "phenotype", trait: "stem", target: "dominant", description: "Crie uma planta com caule verde" }, cards: ["VV", "Vv", "Vv", "Vv", "vv", "vv"] },
-      { title: "Fase 8: Heterozigoto em Folha", objective: { type: "genotype", trait: "leaf", target: "Ll", description: "Crie uma planta heterozigótica para folhas" }, cards: ["LL", "Ll", "Ll", "Ll", "ll", "ll"] },
-      { title: "Fase 9: Cruzamento Cor + Altura", objective: { type: "multi-phenotype", traits: [{ trait: "color", target: "recessive" }, { trait: "height", target: "dominant" }], description: "Crie uma planta com flores brancas e altura alta" }, cards: ["PpAa", "PpAa", "ppAA", "ppAa", "PpAa", "PpAA"] },
-      { title: "Fase 10: Características Combinadas", objective: { type: "multi-phenotype", traits: [{ trait: "stem", target: "dominant" }, { trait: "leaf", target: "dominant" }], description: "Crie uma planta com caule verde e folhas largas" }, cards: ["VVLl", "VvLl", "VVLl", "VvLL", "vvLl", "Vvll"] }
+      { title: "Fase 4: Dominância em Caule", objective: { type: "phenotype", trait: "stem", target: "dominant", description: "Crie uma planta com caule verde" }, cards: ["VV", "vv", "vv", "VV", "vv", "Vv"] },
+      { title: "Fase 5: Recessividade em Folha", objective: { type: "phenotype", trait: "leaf", target: "recessive", description: "Crie uma planta com folhas estreitas" }, cards: ["ll", "Ll", "Ll", "LL", "ll", "Ll"] },
+      { title: "Fase 6: Sementes grandes", objective: { type: "phenotype", trait: "seed", target: "dominant", description: "Crie uma planta com sementes grandes" }, cards: ["SS", "Ss", "ss", "ss", "SS", "SS"] },
+      { title: "Fase 7: Pétalas vermelhas", objective: { type: "phenotype", trait: "petal", target: "dominant", description: "Crie uma planta com pétalas vermelhas" }, cards: ["RR", "Rr", "rr", "rr", "RR", "Rr"] },
+      { title: "Fase 8: Fruta doce", objective: { type: "phenotype", trait: "fruit", target: "dominant", description: "Crie uma planta com frutos doces" }, cards: ["dd", "dd", "Dd", "dd", "DD", "Dd"] },
+      { title: "Fase 9: Espinhos presentes", objective: { type: "phenotype", trait: "thorn", target: "dominant", description: "Crie uma planta com espinhos" }, cards: ["TT", "tt", "Tt", "tt", "TT", "tt"] },
+      { title: "Fase 10: Folhas largas", objective: { type: "phenotype", trait: "leaf2", target: "dominant", description: "Crie uma planta com folhas largas" }, cards: ["LL", "Ll", "Ll", "ll", "ll", "Ll"] }
     ];
+
 
     // Estado do jogo
     let gameState = {
